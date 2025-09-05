@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * 支付宝应用信息配置文件
  * 参考文档：https://opendocs.alipay.com/common/02kipl
  */
-$alipay_config = [
+return [
 
      //=======【应用基本信息设置】=======
      /**
@@ -78,4 +80,3 @@ $alipay_config = [
      'gateway_url' => "https://openapi.alipay.com/gateway.do",
 
 ];
-return $alipay_config;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Alipay\Aop;
 
 class AlipayResponse
@@ -26,68 +28,63 @@ class AlipayResponse
 
     /**
      * 原始响应
-     *
-     * @var string
      */
-    protected $raw;
+    protected string $raw;
 
     /**
      * 已解析的响应
-     *
-     * @var mixed
      */
-    protected $parsed;
+    protected mixed $parsed;
 
     /**
      * 数据节点名称
      */
-    protected $nodeName;
+    protected string $nodeName = '';
 
     /**
      * 待验签数据
      */
-    protected $signData;
+    protected ?string $signData = null;
 
-
-	/**
-	 * @param string $raw 原始数据
-	 * @param string $apiName 接口名称
-	 * @throws \Exception
-	 */
+    /**
+     * @param string $raw 原始数据
+     * @param string $apiName 接口名称
+     * @throws \Exception
+     */
     public function __construct(string $raw, string $apiName)
     {
         $this->raw = $raw;
         $this->parsed = json_decode($raw, true);
         if (!$this->parsed) {
-            $error = function_exists('json_last_error_msg') ? json_last_error_msg() : json_last_error();
-            throw new \Exception('返回数据解析失败:'.$error);
+            $error = function_exists('json_last_error_msg') ? json_last_error_msg() : (string) json_last_error();
+            throw new \Exception('返回数据解析失败:' . $error);
         }
         $this->parseResponseData($apiName);
     }
 
-	/**
-	 * 获取原始响应的被签名数据，用于验证签名.
-	 *
-	 * @param string $apiName
-	 * @throws \Exception
-	 */
-    protected function parseResponseData(string $apiName)
+    /**
+     * 获取原始响应的被签名数据，用于验证签名
+     *
+     * @param string $apiName
+     * @throws \Exception
+     */
+    protected function parseResponseData(string $apiName): void
     {
-        $nodeName = str_replace(".", "_", $apiName) . self::RESPONSE_SUFFIX;
+        $nodeName = str_replace('.', '_', $apiName) . self::RESPONSE_SUFFIX;
         $nodeIndex = strpos($this->raw, $nodeName);
-        if (!$nodeIndex) {
+        if ($nodeIndex === false) {
             $nodeName = self::ERROR_NODE;
             $nodeIndex = strpos($this->raw, $nodeName);
-            if(!$nodeIndex){
+            if ($nodeIndex === false) {
                 throw new \Exception('Response data not found');
             }
         }
         $this->nodeName = $nodeName;
 
         $signDataStartIndex = $nodeIndex + strlen($nodeName) + 2;
-        $signIndex = strrpos($this->raw, '"'.static::ALIPAY_CERT_SN.'"');
-        if(!$signIndex) {
-            $signIndex = strrpos($this->raw, '"'.static::SIGN_NODE.'"');
+        $signIndex = strrpos($this->raw, '"' . static::ALIPAY_CERT_SN . '"');
+        if ($signIndex === false) {
+            $signIndex = strrpos($this->raw, '"' . static::SIGN_NODE . '"');
         }
 
         $signDataEndIndex = $signIndex - 1;
@@ -98,11 +95,11 @@ class AlipayResponse
 
         $this->signData = substr($this->raw, $signDataStartIndex, $indexLen);
     }
-    
+
     /**
      * 获取待验签数据
      *
-     * @return string
+     * @return string|null
      */
     public function getSignData(): ?string
     {
@@ -110,9 +107,9 @@ class AlipayResponse
     }
 
     /**
-     * 获取响应内的签名.
+     * 获取响应内的签名
      *
-     * @return string
+     * @return string|null
      */
     public function getSign(): ?string
     {
@@ -123,26 +120,25 @@ class AlipayResponse
     }
 
     /**
-     * 获取响应内的数据.
+     * 获取响应内的数据
      *
      * @param bool $assoc
-     *
      * @return mixed|object
      */
-    public function getData(bool $assoc = true)
+    public function getData(bool $assoc = true): mixed
     {
-        if (!isset($this->parsed[$this->nodeName])){
+        if (!isset($this->parsed[$this->nodeName])) {
             return null;
         }
         $result = $this->parsed[$this->nodeName];
         if (!$assoc) {
-            $result = (object) ($result);
+            $result = (object) $result;
         }
         return $result;
     }
 
     /**
-     * 判断响应是否成功.
+     * 判断响应是否成功
      *
      * @return bool
      */
@@ -151,15 +147,15 @@ class AlipayResponse
         if (isset($this->parsed[static::ERROR_NODE])) {
             return false;
         }
-        if (!isset($this->parsed[$this->nodeName])){
+        if (!isset($this->parsed[$this->nodeName])) {
             return false;
         }
         $data = $this->parsed[$this->nodeName];
-        return isset($data['code']) && $data['code'] == '10000';
+        return isset($data['code']) && $data['code'] === '10000';
     }
 
     /**
-     * 获取原始响应.
+     * 获取原始响应
      *
      * @return string
      */
@@ -171,9 +167,9 @@ class AlipayResponse
     /**
      * 获取支付宝公钥证书序列号
      *
-     * @return bool|string
+     * @return string|false
      */
-    public function getAlipayCertSN()
+    public function getAlipayCertSN(): string|bool
     {
         if (isset($this->parsed[static::ALIPAY_CERT_SN])) {
             return $this->parsed[static::ALIPAY_CERT_SN];

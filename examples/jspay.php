@@ -1,11 +1,15 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * 支付宝生活号支付(JS支付)示例
  * 使用此支付类型前，需要在支付宝开放平台应用里面，配置授权回调域名
  */
 
 require __DIR__.'/../vendor/autoload.php';
-@header('Content-Type: text/html; charset=UTF-8');
+header('Content-Type: text/html; charset=UTF-8');
+
 $hostInfo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'];
 
 //引入配置文件
@@ -13,15 +17,15 @@ $alipay_config = require('config.php');
 
 //支付宝快捷登录并获取openid
 $redirect_uri = $hostInfo.$_SERVER['REQUEST_URI'];
-try{
+try {
     $oauth = new \Alipay\AlipayOauthService($alipay_config);
-    if(isset($_GET['auth_code'])){
+    if (isset($_GET['auth_code'])) {
         $result = $oauth->getToken($_GET['auth_code']);
         $openid = $result['user_id'];
-    }else{
+    } else {
         $oauth->oauth($redirect_uri);
     }
-}catch(Exception $e){
+} catch (Exception $e) {
     echo '支付宝快捷登录失败！'.$e->getMessage();
     exit;
 }
@@ -35,18 +39,18 @@ $bizContent = [
     'total_amount' => '0.15', //订单金额，单位为元
     'subject' => 'sample subject', //商品的标题
 ];
-if(!empty($result['user_id'])){
+if (!empty($result['user_id'])) {
     $bizContent['buyer_id'] = $result['user_id'];
-}else{
+} else {
     $bizContent['buyer_open_id'] = $result['open_id'];
 }
 
 //发起支付请求
-try{
+try {
     $aop = new \Alipay\AlipayTradeService($alipay_config);
     $result = $aop->qrPay($bizContent);
     $alipay_trade_no = $result['trade_no'];
-}catch(Exception $e){
+} catch (Exception $e) {
     echo '支付宝下单失败！'.$e->getMessage();
     exit;
 }

@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * 支付宝调用其他接口示例
  * 使用\Alipay\AlipayService中的aopExecute方法调用自定义接口
  */
 
 require __DIR__.'/../vendor/autoload.php';
-@header('Content-Type: text/html; charset=UTF-8');
+header('Content-Type: text/html; charset=UTF-8');
 
 $alipay_config = require('config.php');
 $aop = new \Alipay\AlipayService($alipay_config);
@@ -20,10 +23,10 @@ $bizContent = [
     'alias_name' => ''
 ];
 
-try{
+try {
     $result = $aop->aopExecute($apiName, $bizContent);
     print_r($result);
-}catch(Exception $e){
+} catch (Exception $e) {
     echo '错误信息：'.$e->getMessage();
 }
 

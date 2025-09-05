@@ -1,10 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * 支付宝电脑&手机网站支付示例
  */
 
 require __DIR__.'/../vendor/autoload.php';
-@header('Content-Type: text/html; charset=UTF-8');
+header('Content-Type: text/html; charset=UTF-8');
+
 $hostInfo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'];
 
 //引入配置文件
@@ -22,15 +26,15 @@ $bizContent = [
 ];
 
 //发起支付请求
-try{
+try {
     $aop = new \Alipay\AlipayTradeService($alipay_config);
     //$aop->directPayParams($bizContent); //互联网平台直付通补充业务参数
-    if(preg_match('/(android|iphone|ipod|windows phone)/i', $_SERVER['HTTP_USER_AGENT'])){ //判断UA为手机浏览器
+    if (preg_match('/(android|iphone|ipod|windows phone)/i', $_SERVER['HTTP_USER_AGENT'] ?? '')) { //判断UA为手机浏览器
         $html = $aop->wapPay($bizContent);
-    }else{
+    } else {
         $html = $aop->pagePay($bizContent);
     }
     echo $html;
-}catch(Exception $e){
+} catch (Exception $e) {
     echo '支付宝下单失败！'.$e->getMessage();
 }

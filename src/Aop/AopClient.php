@@ -1,62 +1,64 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Alipay\Aop;
 
 use Exception;
 
 class AopClient
 {
-    //应用ID
-    public $appId;
+    // 应用ID
+    public string $appId;
 
-    //网关
-    public $gatewayUrl = 'https://openapi.alipay.com/gateway.do';
+    // 网关
+    public string $gatewayUrl = 'https://openapi.alipay.com/gateway.do';
 
-    //API版本
-    public $apiVersion = '1.0';
+    // API版本
+    public string $apiVersion = '1.0';
 
-    //编码
-    public $charset = 'UTF-8';
+    // 编码
+    public string $charset = 'UTF-8';
 
-    //返回数据格式
-    public $format = 'json';
+    // 返回数据格式
+    public string $format = 'json';
 
-    //应用私钥
-    public $rsaPrivateKey;
+    // 应用私钥
+    public string $rsaPrivateKey;
 
-    //应用私钥文件路径
-    public $rsaPrivateKeyFilePath;
+    // 应用私钥文件路径
+    public string $rsaPrivateKeyFilePath;
 
-    //支付宝公钥
-    public $rsaPublicKey;
+    // 支付宝公钥
+    public string $rsaPublicKey;
 
-    //支付宝公钥文件路径
-    public $rsaPublicKeyFilePath;
+    // 支付宝公钥文件路径
+    public string $rsaPublicKeyFilePath;
 
-    //AES加密密钥
-    public $encryptKey;
+    // AES加密密钥
+    public string $encryptKey;
 
-    //签名方式
-    public $signType = 'RSA2'; 
+    // 签名方式
+    public string $signType = 'RSA2';
 
-    //应用公钥证书编号
-    public $appCertSN;
+    // 应用公钥证书编号
+    public string $appCertSN;
 
-    //支付宝根证书编号
-    public $alipayRootCertSN;
+    // 支付宝根证书编号
+    public string $alipayRootCertSN;
 
-    //SDK版本
-    protected $sdkVersion = 'alipay-sdk-PHP-4.11.14.ALL';
+    // SDK版本
+    protected string $sdkVersion = 'alipay-sdk-PHP-4.11.14.ALL';
 
     /**
-     * 创建客户端.
-     *
+     * 创建客户端
      */
-    public function __construct() {
+    public function __construct()
+    {
     }
 
     /**
-     * AES解密数据.
+     * AES解密数据
      *
      * @param string $content 已加密的数据，如手机号
      * @param string $aesKey  AES密钥
@@ -68,11 +70,11 @@ class AopClient
      */
     public static function aesDecrypt(string $content, string $aesKey): string
     {
-        return openssl_decrypt($content, 'aes-128-cbc', base64_decode($aesKey));
+        return openssl_decrypt($content, 'aes-128-cbc', base64_decode($aesKey)) ?: '';
     }
 
     /**
-     * AES加密数据.
+     * AES加密数据
      *
      * @param string $content 要加密的数据
      * @param string $aesKey  AES密钥
@@ -82,22 +84,22 @@ class AopClient
     public static function aesEncrypt(string $content, string $aesKey): string
     {
         $result = openssl_encrypt($content, 'aes-128-cbc', base64_decode($aesKey));
-        return base64_encode($result);
+        return base64_encode($result ?: '');
     }
 
-	/**
-	 * 发起请求并解析结果
-	 *
-	 * @param AlipayRequest $request
-	 *
-	 * @return AlipayResponse
-	 * @throws Exception
-	 */
+    /**
+     * 发起请求并解析结果
+     *
+     * @param AlipayRequest $request
+     *
+     * @return AlipayResponse
+     * @throws Exception
+     */
     public function execute(AlipayRequest $request): AlipayResponse
     {
         $params = $this->build($request);
 
-        $url = $this->gatewayUrl.'?charset='.$this->charset;
+        $url = $this->gatewayUrl . '?charset=' . $this->charset;
         $raw = $this->curl($url, $params);
 
         $response = new AlipayResponse($raw, $request->getApiMethodName());
@@ -107,13 +109,13 @@ class AopClient
         return $response;
     }
 
-	/**
-	 * 生成用于调用收银台SDK的字符串
-	 *
-	 * @param AlipayRequest $request
-	 * @return string
-	 * @throws Exception
-	 */
+    /**
+     * 生成用于调用收银台SDK的字符串
+     *
+     * @param AlipayRequest $request
+     * @return string
+     * @throws Exception
+     */
     public function sdkExecute(AlipayRequest $request): string
     {
         $params = $this->build($request);
@@ -121,20 +123,20 @@ class AopClient
         return http_build_query($params);
     }
 
-	/**
-	 * 页面提交执行方法
-	 *
-	 * @param AlipayRequest $request
-	 * @param string $httpmethod
-	 * @return string
-	 * @throws Exception
-	 */
+    /**
+     * 页面提交执行方法
+     *
+     * @param AlipayRequest $request
+     * @param string $httpmethod
+     * @return string
+     * @throws Exception
+     */
     public function pageExecute(AlipayRequest $request, string $httpmethod = 'POST'): string
     {
         $params = $this->build($request);
 
-        if (strtoupper($httpmethod) == 'REDIRECT') {
-            $requestUrl = $this->gatewayUrl.'?'.http_build_query($params);
+        if (strtoupper($httpmethod) === 'REDIRECT') {
+            $requestUrl = $this->gatewayUrl . '?' . http_build_query($params);
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $requestUrl);
@@ -149,23 +151,22 @@ class AopClient
                 throw new Exception($errmsg, 0);
             }
             $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if ($httpStatusCode == 301 || $httpStatusCode == 302) {
+            if ($httpStatusCode === 301 || $httpStatusCode === 302) {
                 $redirect_url = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
                 curl_close($ch);
                 return $redirect_url;
-            } elseif ($httpStatusCode == 200) {
+            } elseif ($httpStatusCode === 200) {
                 curl_close($ch);
                 $response = mb_convert_encoding($response, 'UTF-8', 'GB2312');
-                if(preg_match('/<div\s+class="Todo">([^<]+)<\/div>/i', $response, $matchers)) {
+                if (preg_match('/<div\s+class="Todo">([^<]+)<\/div>/i', $response, $matchers)) {
                     throw new Exception($matchers[1]);
                 }
             }
             throw new Exception('返回数据解析失败', $httpStatusCode);
-
-        } elseif (strtoupper($httpmethod) == 'GET') {
-	        return $this->gatewayUrl.'?'.http_build_query($params);
+        } elseif (strtoupper($httpmethod) === 'GET') {
+            return $this->gatewayUrl . '?' . http_build_query($params);
         } else {
-            $url = $this->gatewayUrl.'?charset='.$this->charset;
+            $url = $this->gatewayUrl . '?charset=' . $this->charset;
 
             $html = "<form id='alipaysubmit' name='alipaysubmit' action='{$url}' method='POST'>";
             foreach ($params as $key => $value) {
@@ -177,19 +178,19 @@ class AopClient
             }
             $html .= "<input type='submit' value='ok' style='display:none;'></form>";
             $html .= "<script>document.forms['alipaysubmit'].submit();</script>";
-    
+
             return $html;
         }
     }
 
-	/**
-	 * 拼接请求参数并签名.
-	 *
-	 * @param AlipayRequest $request
-	 *
-	 * @return array
-	 * @throws Exception
-	 */
+    /**
+     * 拼接请求参数并签名
+     *
+     * @param AlipayRequest $request
+     *
+     * @return array
+     * @throws Exception
+     */
     protected function build(AlipayRequest $request): array
     {
         // 组装系统参数
@@ -235,13 +236,14 @@ class AopClient
         return $sysParams;
     }
 
-	/**
-	 * 验证返回内容签名
-	 *
-	 * @param AlipayResponse $response
-	 * @throws Exception
-	 */
-    protected function verifyResponse(AlipayResponse $response)
+    /**
+     * 校验响应结果
+     *
+     * @param AlipayResponse $response
+     *
+     * @throws Exception
+     */
+    protected function verifyResponse(AlipayResponse $response): void
     {
         $signData = $response->getSignData();
         $sign = $response->getSign();

@@ -1,36 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Alipay\Aop;
 
 class AlipayRequest
 {
-    protected $notifyUrl;
+    protected ?string $notifyUrl = null;
 
-    protected $returnUrl;
+    protected ?string $returnUrl = null;
 
-    protected $terminalType;
+    protected ?string $terminalType = null;
 
-    protected $terminalInfo;
+    protected ?string $terminalInfo = null;
 
-    protected $prodCode;
+    protected ?string $prodCode = null;
 
-    protected $authToken;
+    protected ?string $authToken = null;
 
-    protected $appAuthToken;
+    protected ?string $appAuthToken = null;
 
-    protected $bizContent;
+    protected mixed $bizContent = null;
 
-    protected $apiMethodName;
+    protected string $apiMethodName = '';
 
-    public function setOtherParams($params = [])
+    /**
+     * 设置其他参数
+     *
+     * @param array $params
+     * @return AlipayRequest
+     */
+    public function setOtherParams(array $params = []): AlipayRequest
     {
         foreach ($params as $key => $value) {
             $this->{$key} = $value;
         }
+
+        return $this;
     }
 
     /**
-     * 获取用于发起请求的“时间戳”.
+     * 获取用于发起请求的"时间戳"
      *
      * @return string
      */
@@ -40,7 +50,7 @@ class AlipayRequest
     }
 
     /**
-     * 根据类名获取 API 方法名.
+     * 根据类名获取 API 方法名
      *
      * @return string
      */
@@ -49,110 +59,203 @@ class AlipayRequest
         return $this->apiMethodName;
     }
 
-    public function setApiMethodName($apiMethodName): AlipayRequest
+    /**
+     * 设置API方法名
+     *
+     * @param string $apiMethodName
+     * @return AlipayRequest
+     */
+    public function setApiMethodName(string $apiMethodName): AlipayRequest
     {
         $this->apiMethodName = $apiMethodName;
 
         return $this;
     }
 
-    public function getNotifyUrl()
+    /**
+     * 获取通知URL
+     *
+     * @return string|null
+     */
+    public function getNotifyUrl(): ?string
     {
         return $this->notifyUrl;
     }
 
-    public function setNotifyUrl($notifyUrl): AlipayRequest
+    /**
+     * 设置通知URL
+     *
+     * @param string|null $notifyUrl
+     * @return AlipayRequest
+     */
+    public function setNotifyUrl(?string $notifyUrl): AlipayRequest
     {
         $this->notifyUrl = $notifyUrl;
 
         return $this;
     }
 
-    public function getReturnUrl()
+    /**
+     * 获取返回URL
+     *
+     * @return string|null
+     */
+    public function getReturnUrl(): ?string
     {
         return $this->returnUrl;
     }
 
-    public function setReturnUrl($returnUrl): AlipayRequest
+    /**
+     * 设置返回URL
+     *
+     * @param string|null $returnUrl
+     * @return AlipayRequest
+     */
+    public function setReturnUrl(?string $returnUrl): AlipayRequest
     {
         $this->returnUrl = $returnUrl;
 
         return $this;
     }
 
-    public function getTerminalType()
+    /**
+     * 获取终端类型
+     *
+     * @return string|null
+     */
+    public function getTerminalType(): ?string
     {
         return $this->terminalType;
     }
 
-    public function setTerminalType($terminalType): AlipayRequest
+    /**
+     * 设置终端类型
+     *
+     * @param string|null $terminalType
+     * @return AlipayRequest
+     */
+    public function setTerminalType(?string $terminalType): AlipayRequest
     {
         $this->terminalType = $terminalType;
 
         return $this;
     }
 
-    public function getTerminalInfo()
+    /**
+     * 获取终端信息
+     *
+     * @return string|null
+     */
+    public function getTerminalInfo(): ?string
     {
         return $this->terminalInfo;
     }
 
-    public function setTerminalInfo($terminalInfo): AlipayRequest
+    /**
+     * 设置终端信息
+     *
+     * @param string|null $terminalInfo
+     * @return AlipayRequest
+     */
+    public function setTerminalInfo(?string $terminalInfo): AlipayRequest
     {
         $this->terminalInfo = $terminalInfo;
 
         return $this;
     }
 
-    public function getProdCode()
+    /**
+     * 获取产品代码
+     *
+     * @return string|null
+     */
+    public function getProdCode(): ?string
     {
         return $this->prodCode;
     }
 
-    public function setProdCode($prodCode): AlipayRequest
+    /**
+     * 设置产品代码
+     *
+     * @param string|null $prodCode
+     * @return AlipayRequest
+     */
+    public function setProdCode(?string $prodCode): AlipayRequest
     {
         $this->prodCode = $prodCode;
 
         return $this;
     }
 
-    public function getAuthToken()
+    /**
+     * 获取授权令牌
+     *
+     * @return string|null
+     */
+    public function getAuthToken(): ?string
     {
         return $this->authToken;
     }
 
-    public function setAuthToken($authToken): AlipayRequest
+    /**
+     * 设置授权令牌
+     *
+     * @param string|null $authToken
+     * @return AlipayRequest
+     */
+    public function setAuthToken(?string $authToken): AlipayRequest
     {
         $this->authToken = $authToken;
 
         return $this;
     }
 
-    public function getAppAuthToken()
+    /**
+     * 获取应用授权令牌
+     *
+     * @return string|null
+     */
+    public function getAppAuthToken(): ?string
     {
         return $this->appAuthToken;
     }
 
-    public function setAppAuthToken($appAuthToken): AlipayRequest
+    /**
+     * 设置应用授权令牌
+     *
+     * @param string|null $appAuthToken
+     * @return AlipayRequest
+     */
+    public function setAppAuthToken(?string $appAuthToken): AlipayRequest
     {
         $this->appAuthToken = $appAuthToken;
 
         return $this;
     }
 
-    public function getBizContent()
+    /**
+     * 获取业务内容
+     *
+     * @return string
+     */
+    public function getBizContent(): string
     {
         if (is_array($this->bizContent)) {
             return json_encode($this->bizContent, JSON_UNESCAPED_UNICODE);
         }
-        return $this->bizContent;
+        return (string) $this->bizContent;
     }
 
-    public function setBizContent($bizContent = []): AlipayRequest
+    /**
+     * 设置业务内容
+     *
+     * @param mixed $bizContent
+     * @return AlipayRequest
+     */
+    public function setBizContent(mixed $bizContent = []): AlipayRequest
     {
         $this->bizContent = $bizContent;
 
         return $this;
     }
-
 }

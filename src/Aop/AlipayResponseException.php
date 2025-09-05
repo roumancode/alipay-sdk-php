@@ -1,41 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Alipay\Aop;
 
 class AlipayResponseException extends \Exception
 {
-    private $res = [];
-    private $retCode;
-    private $errCode;
+    private array $res = [];
+    private string $retCode = '';
+    private ?string $errCode = null;
 
     /**
      * @param array $res
      */
-    public function __construct($res)
+    public function __construct(array $res)
     {
         $this->res = $res;
-        $this->retCode = $res['code'];
+        $this->retCode = (string) ($res['code'] ?? '');
         if (isset($res['sub_msg'])) {
-            $this->errCode = $res['sub_code'];
-            $message = '['.$res['sub_code'].']'.$res['sub_msg'];
+            $this->errCode = (string) $res['sub_code'];
+            $message = '[' . $res['sub_code'] . ']' . $res['sub_msg'];
         } elseif (isset($res['msg'])) {
-            $message = '['.$res['code'].']'.$res['msg'];
+            $message = '[' . $res['code'] . ']' . $res['msg'];
         } else {
             $message = '未知错误';
         }
         parent::__construct($message);
     }
 
-    public function getRetCode()
+    /**
+     * 获取返回码
+     *
+     * @return string
+     */
+    public function getRetCode(): string
     {
         return $this->retCode;
     }
 
-    public function getErrCode()
+    /**
+     * 获取错误码
+     *
+     * @return string|null
+     */
+    public function getErrCode(): ?string
     {
         return $this->errCode;
     }
 
+    /**
+     * 获取响应数据
+     *
+     * @return array
+     */
     public function getResponse(): array
     {
         return $this->res;
