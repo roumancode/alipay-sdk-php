@@ -27,13 +27,13 @@ class AopClient
     public string $rsaPrivateKey;
 
     // 应用私钥文件路径
-    public string $rsaPrivateKeyFilePath;
+    public string $rsaPrivateKeyFilePath = '';
 
     // 支付宝公钥
     public string $rsaPublicKey;
 
     // 支付宝公钥文件路径
-    public string $rsaPublicKeyFilePath;
+    public string $rsaPublicKeyFilePath = '';
 
     // AES加密密钥
     public string $encryptKey;
