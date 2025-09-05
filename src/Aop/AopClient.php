@@ -433,7 +433,7 @@ class AopClient
 	 * @return bool|string
 	 * @throws Exception
 	 */
-    protected function curl(string $url, array $postFields = null)
+    protected function curl(string $url, ?array $postFields = null)
     {
         $ch = curl_init();
 
