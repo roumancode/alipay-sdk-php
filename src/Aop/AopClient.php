@@ -42,10 +42,10 @@ class AopClient
     public string $signType = 'RSA2';
 
     // 应用公钥证书编号
-    public string $appCertSN;
+    public string $appCertSN = '';
 
     // 支付宝根证书编号
-    public string $alipayRootCertSN;
+    public string $alipayRootCertSN = '';
 
     // SDK版本
     protected string $sdkVersion = 'alipay-sdk-PHP-4.11.14.ALL';
