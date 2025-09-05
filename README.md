@@ -1,5 +1,6 @@
 # Alipay SDK for PHP
 支付宝开放平台第三方 PHP SDK，基于官方最新版本，支持公钥和公钥证书2种模式。
+forked from [`netcccyun/alipay-sdk-php`](https://github.com/netcccyun/alipay-sdk-php) 升级到php8.0+
 
 ### 功能特点
 
@@ -18,7 +19,7 @@
 1. Composer 安装。
 
    ```bash
-   composer require cccyun/alipay-sdk
+   composer require tailroubin/alipay-sdk
    ```
 
 2. 创建配置文件 [`config.php`](./examples/config.php)，填写配置信息。
