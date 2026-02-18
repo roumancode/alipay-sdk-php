@@ -147,16 +147,13 @@ class AopClient
             $response = curl_exec($ch);
             if (curl_errno($ch) > 0) {
                 $errmsg = curl_error($ch);
-                curl_close($ch);
                 throw new Exception($errmsg, 0);
             }
             $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($httpStatusCode === 301 || $httpStatusCode === 302) {
                 $redirect_url = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
-                curl_close($ch);
                 return $redirect_url;
             } elseif ($httpStatusCode === 200) {
-                curl_close($ch);
                 $response = mb_convert_encoding($response, 'UTF-8', 'GB2312');
                 if (preg_match('/<div\s+class="Todo">([^<]+)<\/div>/i', $response, $matchers)) {
                     throw new Exception($matchers[1]);
@@ -225,7 +222,7 @@ class AopClient
             if (is_array($param) || is_object($param) && !$param instanceof \CURLFile) {
                 $param = json_encode($param, JSON_UNESCAPED_UNICODE);
             }
-            if (is_null($param)) {
+            if ($param === null) {
                 unset($sysParams[$key]);
             }
         }
@@ -252,7 +249,7 @@ class AopClient
         }
         $checkResult = $this->rsaPubilcVerify($signData, $sign, $this->signType);
         if (!$checkResult) {
-            if (strpos($signData, '\/') > 0) {
+            if (str_contains($signData, '\/')) {
                 $signData = str_replace('\/', '/', $signData);
                 $checkResult = $this->rsaPubilcVerify($signData, $sign, $this->signType);
             }
@@ -337,7 +334,7 @@ class AopClient
 
         $stringToBeSigned = "";
         foreach ($params as $k => $v) {
-            if($v instanceof \CURLFile || $this->isEmpty($v) || substr($v, 0, 1) == '@') continue;
+            if($v instanceof \CURLFile || $this->isEmpty($v) || str_starts_with($v, '@')) continue;
             $stringToBeSigned .= "&{$k}={$v}";
         }
 	    return substr($stringToBeSigned, 1);
@@ -373,9 +370,6 @@ class AopClient
         }else{
             openssl_sign($data, $sign, $res);
         }
-        if(is_resource($res)){
-            openssl_free_key($res);
-        }
         return base64_encode($sign);
     }
 
@@ -406,9 +400,6 @@ class AopClient
             $result = openssl_verify($data, base64_decode($sign), $res, OPENSSL_ALGO_SHA256);
         }else{
             $result = openssl_verify($data, base64_decode($sign), $res);
-        }
-        if(is_resource($res)){
-            openssl_free_key($res);
         }
         return $result === 1;
     }
@@ -448,7 +439,7 @@ class AopClient
             foreach ($postFields as &$value) {
                 if ($value instanceof \CURLFile) {
                     $postMultipart = true;
-                } elseif(substr($value, 0, 1) == '@' && class_exists('CURLFile')) {
+                } elseif(str_starts_with($value, '@')) {
                     $postMultipart = true;
                     $file = substr($value, 1);
                     if(file_exists($file)){
@@ -468,17 +459,13 @@ class AopClient
 
         if (curl_errno($ch) > 0) {
             $errmsg = curl_error($ch);
-            curl_close($ch);
             throw new Exception($errmsg, 0);
         }
 
         $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($httpStatusCode != 200) {
-            curl_close($ch);
             throw new Exception($response, $httpStatusCode);
         }
-
-        curl_close($ch);
 
         return $response;
     }

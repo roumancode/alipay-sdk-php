@@ -56,7 +56,7 @@ class AlipayResponse
         $this->raw = $raw;
         $this->parsed = json_decode($raw, true);
         if (!$this->parsed) {
-            $error = function_exists('json_last_error_msg') ? json_last_error_msg() : (string) json_last_error();
+            $error = json_last_error_msg();
             throw new \Exception('返回数据解析失败:' . $error);
         }
         $this->parseResponseData($apiName);
